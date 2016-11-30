@@ -10,8 +10,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-ggplot2 Syntax
----
+## ggplot2 Syntax
+
     # If you haven't already install the package.
     install.packages("ggplot2")
     
@@ -21,20 +21,25 @@ ggplot2 Syntax
     ggplot([insert data here], aes([insert variables here])) + geom_[graph type]
 
 
-# Basic Example
-
-## App
+## Basic Example
 ```{r eruptions, echo=FALSE}
+library(ggplot2)
 data(diamonds)
 dat <- diamonds
 
-inputPanel(
-  textInput("mycode", label = "Code:",
-              "ggplot(dat,aes(x=cut,y=price)) + geom_point()")
+fluidRow(
+  column(11,
+         textInput("mycode",label=NULL,
+                   value="ggplot(dat,aes(x=cut,y=price)) + geom_point()",width="100%"),
+         tags$style(type="text/css", "#mycode { height: 50px; width: 100%; font-size: 30px; display: block;}")
+  ),
+  column(1,
+         actionButton("submit","Submit")
+  )
 )
-
 renderPlot({
-  eval(parse(text=input$mycode))
+  input$submit
+  eval(parse(text=isolate(input$mycode)))
 })
 ```
 
