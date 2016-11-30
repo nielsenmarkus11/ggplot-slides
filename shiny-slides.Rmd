@@ -1,0 +1,79 @@
+---
+title: "Shiny-Server"
+author: "http://lpv-phdev01:3838/shiny-slides"
+runtime: shiny
+output: 
+  ioslides_presentation:
+    widescreen: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Basic Example
+
+## App
+```{r eruptions, echo=FALSE}
+inputPanel(
+  selectInput("n_breaks", label = "Number of bins:",
+              choices = c(10, 20, 35, 50), selected = 20),
+  
+  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
+              min = 0.2, max = 2, value = 1, step = 0.2)
+)
+
+renderPlot({
+  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
+       xlab = "Duration (minutes)", main = "Geyser eruption duration")
+  
+  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
+  lines(dens, col = "blue")
+})
+```
+
+## Code
+```{r, echo=TRUE, eval=FALSE}
+inputPanel(
+  selectInput("n_breaks", label = "Number of bins:",
+              choices = c(10, 20, 35, 50), selected = 20),
+  
+  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
+              min = 0.2, max = 2, value = 1, step = 0.2)
+)
+
+renderPlot({
+  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
+       xlab = "Duration (minutes)", main = "Geyser eruption duration")
+  
+  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
+  lines(dens, col = "blue")
+})
+```
+
+
+# How does Shiny-Server differentiate?
+
+## Pros
+
+- Runs any R code
+- Flexibility in reports due to the ability to add HTML, JavaScript, CSS
+- Additional interactivity through the use of [htmlwidgets](http://www.htmlwidgets.org/) and JavaScript libraries
+- User doesn't need R installed on their local machine
+
+<img src="www/smiley-face.jpg" width="200px" height="200px"></img>
+
+## Cons
+
+- Need R developer to create the app 
+- Syntax can by difficult for current R developer to learn/use
+- Apps are only as flexible as R developer defines
+
+<img src="www/sad-face.jpg" width="200px" height="200px"></img>
+
+## More Complex Examples
+- [Soccer Field](https://byusoccerstats.shinyapps.io/byu-soccer/)
+- [Regression Example](http://lpv-phdev01:3838/simp-reg/)
+- [HCC Recapture Project](http://lpv-phdev01:3838/hcc-imp/)
+- These slides! [(Code)](https://git.co.ihc.com/users/mniels17/repos/shiny-slides/browse)
+
+# Questions?
