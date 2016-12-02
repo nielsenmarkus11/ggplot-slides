@@ -5,6 +5,7 @@ runtime: shiny
 output: 
   ioslides_presentation:
     widescreen: true
+    smaller: true
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -22,46 +23,80 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ## Basic Example
-```{r eruptions, echo=FALSE}
+```{r, echo=FALSE}
 library(ggplot2)
-data(diamonds)
-dat <- diamonds
+
+new.theme <- theme_update(axis.text = element_text(size=14),axis.title=element_text(size=18))
+
+ccdat <- read.csv("chronic-conditions.csv")
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+ccdat$state <- trim(ccdat$state)
+ccdat$year <- as.numeric(ccdat$year)
+alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
 
 fluidRow(
-  column(11,
+  column(10,
          textInput("mycode",label=NULL,
-                   value="ggplot(dat,aes(x=cut,y=price)) + geom_point()",width="100%"),
-         tags$style(type="text/css", "#mycode { height: 50px; width: 100%; font-size: 30px; display: block;}")
+                   value="ggplot(alldat,aes(x=year,y=prevalence)) + geom_point()",width="100%"),
+         tags$style(type="text/css", "#mycode { height: 36px; width: 100%; font-size: 18px; display: block;}")
   ),
-  column(1,
-         actionButton("submit","Submit")
+  column(2,
+         actionButton("submit","Submit"),
+         tags$style(type="text/css", "#submit { height: 36px; width: 100%; font-size: 18px; display: block;}")
   )
 )
 renderPlot({
   input$submit
   eval(parse(text=isolate(input$mycode)))
-})
+},height=450)
 ```
 
-## Code
-```{r, echo=TRUE, eval=FALSE}
-inputPanel(
-  selectInput("n_breaks", label = "Number of bins:",
-              choices = c(10, 20, 35, 50), selected = 20),
-  
-  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
-              min = 0.2, max = 2, value = 1, step = 0.2)
+## geom_line()
+```{r, echo=FALSE}
+
+ut.all <- ccdat[ccdat$state=="Utah" & ccdat$age=="All" & ccdat$chronicCondition=="Diabetes",]
+
+fluidRow(
+  column(10,
+         textInput("mycode2",label=NULL,
+                   value="ggplot(ut.all,aes(x=year,y=prevalence,color=gender)) + geom_line()",width="100%"),
+         tags$style(type="text/css", "#mycode2 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+  ),
+  column(2,
+         actionButton("submit2","Submit"),
+         tags$style(type="text/css", "#submit2 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+  )
 )
-
 renderPlot({
-  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
-       xlab = "Duration (minutes)", main = "Geyser eruption duration")
-  
-  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
-  lines(dens, col = "blue")
-})
+  input$submit2
+  eval(parse(text=isolate(input$mycode2)))
+},height=450)
 ```
 
+## geom_bar()
+g1 <- ggplot(ut.all,aes(x=year,y=prevalence,fill=gender))
+```{r, echo=FALSE}
+g1 <- ggplot(ut.all,aes(x=year,y=prevalence,fill=gender))
+fluidRow(
+  column(10,
+         textInput("mycode3",label=NULL,
+                   value="g1 + geom_bar(stat=\"identity\",position=\"dodge\")",width="100%"),
+         tags$style(type="text/css", "#mycode3 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+  ),
+  column(2,
+         actionButton("submit3","Submit"),
+         tags$style(type="text/css", "#submit3 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+  )
+)
+renderPlot({
+  input$submit3
+  eval(parse(text=isolate(input$mycode3)))
+},height=450)
+```
+
+
+## Faceting
+ggplot(alldat,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat="identity",position="dodge") + facet_wrap(~chronicCondition)
 
 # How does Shiny-Server differentiate?
 
