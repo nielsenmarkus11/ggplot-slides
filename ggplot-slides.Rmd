@@ -11,18 +11,55 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## ggplot2 Syntax
+## ggplot2 Basics
 
-    # If you haven't already install the package.
-    install.packages("ggplot2")
+    # If you haven't already install the package and load the library.
+    install.packages("ggplot2"); library(ggplot2)
     
-    # Load the library
-    library(ggplot2)
+### ggplot()
     
-    ggplot([insert data here], aes([insert variables here])) + geom_[graph type]
+    # Add layers to ggplot() with '+'
+    ggplot([insert data here], aes(x=[x-var], y=[y-var], color=[color-var], [...])) + geom_[graph type]
+Layers can include combinations of "geoms", "stats", "scales", "faceting", "themes", etc.
 
+### qplot()
 
-## Basic Example
+    # Build a plot using the qplot() function
+    qplot(x=[x-var], y=[y-var], color=[color-var], [...], data=[insert data here], geom = "[graph type]")
+"Some introductions to ggplot2 make use of a function called qplot(), which is intended as a convenient interface for making graphs. It does require a little less typing than using ggplot() plus a geom, but I've found it a bit confusing to use because it has a slightly different way of specifying certain graphing parameters. I think it's simpler and easier to just use ggplot()." -Winston Change (R Graphics Cookbook, 2012)
+
+## Geoms (One Variable)
+alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",]
+```{r, echo=FALSE}
+library(ggplot2)
+
+new.theme <- theme_update(axis.text = element_text(size=14),axis.title=element_text(size=18))
+
+ccdat <- read.csv("chronic-conditions.csv")
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+ccdat$state <- trim(ccdat$state)
+ccdat$year <- as.numeric(ccdat$year)
+alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
+
+fluidRow(
+  column(10,
+         textInput("mycode0",label=NULL,
+                   value="ggplot(alldat,aes(x=prevalence)) + geom_histogram()",width="100%"),
+         tags$style(type="text/css", "#mycode0 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+  ),
+  column(2,
+         actionButton("submit0","Submit"),
+         tags$style(type="text/css", "#submit0 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+  )
+)
+renderPlot({
+  input$submit0
+  eval(parse(text=isolate(input$mycode0)))
+},height=450)
+```
+
+## Geoms (Two Variables)
+alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",]
 ```{r, echo=FALSE}
 library(ggplot2)
 
@@ -51,41 +88,20 @@ renderPlot({
 },height=450)
 ```
 
-## geom_line()
+## Geoms (Two Variables) cont.
+ut.all <- ccdat[ccdat\$state=="Utah" & ccdat\$age=="All" & ccdat\$chronicCondition=="Diabetes",]
 ```{r, echo=FALSE}
-
 ut.all <- ccdat[ccdat$state=="Utah" & ccdat$age=="All" & ccdat$chronicCondition=="Diabetes",]
 
 fluidRow(
   column(10,
-         textInput("mycode2",label=NULL,
-                   value="ggplot(ut.all,aes(x=year,y=prevalence,color=gender)) + geom_line()",width="100%"),
-         tags$style(type="text/css", "#mycode2 { height: 36px; width: 100%; font-size: 18px; display: block;}")
-  ),
-  column(2,
-         actionButton("submit2","Submit"),
-         tags$style(type="text/css", "#submit2 { height: 36px; width: 100%; font-size: 18px; display: block;}")
-  )
-)
-renderPlot({
-  input$submit2
-  eval(parse(text=isolate(input$mycode2)))
-},height=450)
-```
-
-## geom_bar()
-g1 <- ggplot(ut.all,aes(x=year,y=prevalence,fill=gender))
-```{r, echo=FALSE}
-g1 <- ggplot(ut.all,aes(x=year,y=prevalence,fill=gender))
-fluidRow(
-  column(10,
          textInput("mycode3",label=NULL,
-                   value="g1 + geom_bar(stat=\"identity\",position=\"dodge\")",width="100%"),
-         tags$style(type="text/css", "#mycode3 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+                   value="ggplot(ut.all,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat=\"identity\",position=\"dodge\")",width="100%"),
+         tags$style(type="text/css", "#mycode3 { height: 36px; width: 100%; font-size: 16px; display: block;}")
   ),
   column(2,
          actionButton("submit3","Submit"),
-         tags$style(type="text/css", "#submit3 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+         tags$style(type="text/css", "#submit3 { height: 36px; width: 100%; font-size: 16px; display: block;}")
   )
 )
 renderPlot({
@@ -96,31 +112,40 @@ renderPlot({
 
 
 ## Faceting
-ggplot(alldat,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat="identity",position="dodge") + facet_wrap(~chronicCondition)
+alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",]
+```{r, echo=FALSE}
+library(ggplot2)
 
-# How does Shiny-Server differentiate?
+new.theme <- theme_update(axis.text = element_text(size=14),axis.title=element_text(size=18))
 
-## Pros
+ccdat <- read.csv("chronic-conditions.csv")
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+ccdat$state <- trim(ccdat$state)
+ccdat$year <- as.numeric(ccdat$year)
+alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
 
-- Runs any R code
-- Flexibility in reports due to the ability to add HTML, JavaScript, CSS
-- Additional interactivity through the use of [htmlwidgets](http://www.htmlwidgets.org/) and JavaScript libraries
-- User doesn't need R installed on their local machine
+fluidRow(
+  column(10,
+         textInput("mycode4",label=NULL,
+                   value="ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line()",width="100%"),
+         tags$style(type="text/css", "#mycode4 { height: 36px; width: 100%; font-size: 14px; display: block;}")
+  ),
+  column(2,
+         actionButton("submit4","Submit"),
+         tags$style(type="text/css", "#submit4 { height: 36px; width: 100%; font-size: 14px; display: block;}")
+  )
+)
+renderPlot({
+  input$submit4
+  eval(parse(text=isolate(input$mycode4)))
+},height=450)
+```
 
-<img src="www/smiley-face.jpg" width="200px" height="200px"></img>
+## Citation
 
-## Cons
+- [ggplot2 Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+- CMS Medicare Chronic Conditions data from [cms.gov](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Chronic-Conditions/index.html)
+- [R Graphics Cookbook](http://www.cookbook-r.com/Graphs/) by Winston Change
 
-- Need R developer to create the app 
-- Syntax can by difficult for current R developer to learn/use
-- Apps are only as flexible as R developer defines
-
-<img src="www/sad-face.jpg" width="200px" height="200px"></img>
-
-## More Complex Examples
-- [Soccer Field](https://byusoccerstats.shinyapps.io/byu-soccer/)
-- [Regression Example](http://lpv-phdev01:3838/simp-reg/)
-- [HCC Recapture Project](http://lpv-phdev01:3838/hcc-imp/)
-- These slides! [(Code)](https://git.co.ihc.com/users/mniels17/repos/shiny-slides/browse)
 
 # Questions?
