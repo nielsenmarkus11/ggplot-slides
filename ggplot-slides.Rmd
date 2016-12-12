@@ -11,7 +11,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## CMS Public Data
+## CMS Public Data 
 The data used in these slides is public data located on the CMS page [here](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Chronic-Conditions/index.html).  I've arranged the data into a more usable format for this presentation which can be downloaded by clicking the button below.
 ```{r, echo=FALSE}
 ccdat <- read.csv("chronic-conditions.csv")
@@ -74,7 +74,20 @@ fluidRow(
 )
 renderPlot({
   eval(parse(text=input$mycode0))
-},height=450)
+},height=400)
+
+library(shinyBS)
+fluidRow(
+                            bsButton("q1", label = "", icon = icon("question"),
+                                     style = "info", size = "extra-small"),
+                            bsPopover(id = "q1", title = NULL,
+                                      content = '<img src="images/One-Var.PNG"/>',
+                                      placement = "right", 
+                                      trigger = "click", 
+                                      options = list(container = "body")
+                                      ),
+         tags$style(type="text/css", ".popover { display:block !important; max-width: 800px!important; width:auto;}")
+)
 ```
 
 ## Geoms (Two Variables)
@@ -104,7 +117,19 @@ fluidRow(
 renderPlot({
   input$submit
   eval(parse(text=isolate(input$mycode)))
-},height=450)
+},height=400)
+
+
+fluidRow(
+                            bsButton("q2", label = "", icon = icon("question"),
+                                     style = "info", size = "extra-small"),
+                            bsPopover(id = "q2", title = NULL,
+                                      content = '<img src="images/Two-Var.PNG"/>',
+                                      placement = "right", 
+                                      trigger = "click", 
+                                      options = list(container = "body")
+                                      )
+)
 ```
 
 ## Geoms (Two Variables) cont.
@@ -126,7 +151,18 @@ fluidRow(
 renderPlot({
   input$submit3
   eval(parse(text=isolate(input$mycode3)))
-},height=450)
+},height=400)
+
+
+fluidRow(
+                            bsButton("q3", label = "", icon = icon("question"),
+                                     style = "info", size = "extra-small"),
+                            bsPopover(id = "q3", title = NULL,
+                                      content = '<img src="images/Two-Var.PNG"/>',
+                                      placement = "right", 
+                                      trigger = "click", 
+                                      options = list(container = "body")
+                                      ))
 ```
 
 
@@ -157,7 +193,19 @@ fluidRow(
 renderPlot({
   input$submit4
   eval(parse(text=isolate(input$mycode4)))
-},height=450)
+},height=400)
+
+
+fluidRow(
+                            bsButton("q4", label = "", icon = icon("question"),
+                                     style = "info", size = "extra-small"),
+                            bsPopover(id = "q4", title = NULL,
+                                      content = '<img src="images/Faceting.PNG"/>',
+                                      placement = "right", 
+                                      trigger = "click", 
+                                      options = list(container = "body")
+                                      )
+                            )
 ```
 
 ## Citation
