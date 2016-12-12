@@ -1,6 +1,6 @@
 ---
 title: "ggplot2"
-author: "http://lpv-phdev01:3838/ggplot-slides"
+author: "https://mnielsen.shinyapps.io/ggplot"
 runtime: shiny
 output: 
   ioslides_presentation:
@@ -10,6 +10,27 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## CMS Public Data
+The data used in these slides is public data located on the CMS page [here](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Chronic-Conditions/index.html).  I've arranged the data into a more usable format for this presentation which can be downloaded by clicking the button below.
+```{r, echo=FALSE}
+ccdat <- read.csv("chronic-conditions.csv")
+  
+  output$table <- renderTable({
+    head(ccdat)
+  })
+
+output$downloadData <- downloadHandler(
+  filename = 'chronic-conditions.csv',
+  content = function(file) {
+    write.csv(ccdat, file)}
+    )
+      
+fluidRow(tableOutput('table'),
+  downloadButton('downloadData', 'Download')
+  )
+```
+
 
 ## ggplot2 Basics
 
@@ -26,7 +47,7 @@ Layers can include combinations of "geoms", "stats", "scales", "faceting", "them
 
     # Build a plot using the qplot() function
     qplot(x=[x-var], y=[y-var], color=[color-var], [...], data=[insert data here], geom = "[graph type]")
-"Some introductions to ggplot2 make use of a function called qplot(), which is intended as a convenient interface for making graphs. It does require a little less typing than using ggplot() plus a geom, but I've found it a bit confusing to use because it has a slightly different way of specifying certain graphing parameters. I think it's simpler and easier to just use ggplot()." -Winston Change (R Graphics Cookbook, 2012)
+"Some introductions to ggplot2 make use of a function called qplot(), which is intended as a convenient interface for making graphs. It does require a little less typing than using ggplot() plus a geom, but I've found it a bit confusing to use because it has a slightly different way of specifying certain graphing parameters. I think it's simpler and easier to just use ggplot()." -Winston Chang (R Graphics Cookbook, 2012)
 
 ## Geoms (One Variable)
 alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",]
@@ -34,27 +55,25 @@ alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",]
 library(ggplot2)
 
 new.theme <- theme_update(axis.text = element_text(size=14),axis.title=element_text(size=18))
-
-ccdat <- read.csv("chronic-conditions.csv")
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 ccdat$state <- trim(ccdat$state)
 ccdat$year <- as.numeric(ccdat$year)
 alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
 
 fluidRow(
-  column(10,
-         textInput("mycode0",label=NULL,
-                   value="ggplot(alldat,aes(x=prevalence)) + geom_histogram()",width="100%"),
-         tags$style(type="text/css", "#mycode0 { height: 36px; width: 100%; font-size: 18px; display: block;}")
-  ),
-  column(2,
-         actionButton("submit0","Submit"),
-         tags$style(type="text/css", "#submit0 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+  column(12,
+         selectInput("mycode0",label=NULL,
+                   choices=c("ggplot(alldat,aes(x=prevalence)) + geom_histogram()",
+                            "ggplot(alldat,aes(x=prevalence)) + geom_histogram(binwidth=5)",
+                            "ggplot(alldat,aes(x=prevalence)) + geom_density()",
+                            "ggplot(alldat,aes(x=prevalence,color=gender)) + geom_density()",
+                            "ggplot(alldat,aes(x=prevalence,color=gender,fill=gender)) + geom_density(alpha=0.35)"),
+                   selected = "ggplot(alldat,aes(x=prevalence)) + geom_histogram()",width="100%"),
+         tags$style(type="text/css", ".selectize-dropdown { width: 100%; font-size: 18px; line-height: 18px;} .selectize-input { width: 100%; font-size: 20px; line-height: 20px;}")
   )
 )
 renderPlot({
-  input$submit0
-  eval(parse(text=isolate(input$mycode0)))
+  eval(parse(text=input$mycode0))
 },height=450)
 ```
 
@@ -145,7 +164,7 @@ renderPlot({
 
 - [ggplot2 Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
 - CMS Medicare Chronic Conditions data from [cms.gov](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Chronic-Conditions/index.html)
-- [R Graphics Cookbook](http://www.cookbook-r.com/Graphs/) by Winston Change
+- [R Graphics Cookbook](http://www.cookbook-r.com/Graphs/) by Winston Chang
 
 
 # Questions?
