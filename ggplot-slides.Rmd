@@ -31,6 +31,11 @@ fluidRow(tableOutput('table'),
   )
 ```
 
+To read the data into R run the following code:
+
+    setwd("C:\\path\\to\\folder")
+    # setwd("C:/path/to/folder")
+    ccdat <- read.csv("chronic-conditions.csv")
 
 ## ggplot2 Basics
 
@@ -50,7 +55,7 @@ Layers can include combinations of "geoms", "stats", "scales", "faceting", "them
 "Some introductions to ggplot2 make use of a function called qplot(), which is intended as a convenient interface for making graphs. It does require a little less typing than using ggplot() plus a geom, but I've found it a bit confusing to use because it has a slightly different way of specifying certain graphing parameters. I think it's simpler and easier to just use ggplot()." -Winston Chang (R Graphics Cookbook, 2012)
 
 ## Geoms (One Variable)
-alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",]
+alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",] 
 ```{r, echo=FALSE}
 library(ggplot2)
 
@@ -60,9 +65,13 @@ ccdat$state <- trim(ccdat$state)
 ccdat$year <- as.numeric(ccdat$year)
 alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
 
+checkboxInput("chkbx0",label="Free Text?",FALSE)
+
+renderUI({
+  if(!input$chkbx0){
 fluidRow(
   column(12,
-         selectInput("mycode0",label=NULL,
+           selectInput("mycode0",label=NULL,
                    choices=c("ggplot(alldat,aes(x=prevalence)) + geom_histogram()",
                             "ggplot(alldat,aes(x=prevalence)) + geom_histogram(binwidth=5)",
                             "ggplot(alldat,aes(x=prevalence)) + geom_density()",
@@ -70,11 +79,31 @@ fluidRow(
                             "ggplot(alldat,aes(x=prevalence,color=gender,fill=gender)) + geom_density(alpha=0.35)"),
                    selected = "ggplot(alldat,aes(x=prevalence)) + geom_histogram()",width="100%"),
          tags$style(type="text/css", ".selectize-dropdown { width: 100%; font-size: 18px; line-height: 18px;} .selectize-input { width: 100%; font-size: 20px; line-height: 20px;}")
+  ))
+         } else {
+           
+fluidRow(
+  column(10,
+         textInput("mycode0",label=NULL,
+                   value="ggplot(alldat,aes(x=prevalence)) + geom_histogram()",width="100%"),
+         tags$style(type="text/css", "#mycode0 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+  ),
+  column(2,
+         actionButton("submit0","Submit"),
+         tags$style(type="text/css", "#submit0 { height: 36px; width: 100%; font-size: 18px; display: block;}")
   )
 )
+         }
+  })
+
 renderPlot({
+  if(!input$chkbx0){
   eval(parse(text=input$mycode0))
-},height=400)
+  } else {
+    input$submit0
+    eval(parse(text=isolate(input$mycode0)))
+  }
+},height=375)
 
 library(shinyBS)
 fluidRow(
@@ -103,6 +132,23 @@ ccdat$state <- trim(ccdat$state)
 ccdat$year <- as.numeric(ccdat$year)
 alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
 
+checkboxInput("chkbx",label="Free Text?",TRUE)
+
+renderUI({
+  if(!input$chkbx){
+fluidRow(
+  column(12,
+           selectInput("mycode",label=NULL,
+                   choices=c("ggplot(alldat,aes(x=year,y=prevalence)) + geom_point()",
+                            "ggplot(alldat,aes(x=as.factor(year),y=prevalence)) + geom_boxplot()",
+                            "ggplot(alldat,aes(x=year,y=prevalence)) + geom_smooth(method=lm)",
+                            "ggplot(alldat,aes(x=year,y=prevalence)) + geom_point() + geom_smooth(method=lm)",
+                            "ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line()"),
+                   selected = "ggplot(alldat,aes(x=year,y=prevalence)) + geom_point()",width="100%"),
+         tags$style(type="text/css", ".selectize-dropdown { width: 100%; font-size: 18px; line-height: 18px;} .selectize-input { width: 100%; font-size: 20px; line-height: 20px;}")
+  ))
+    
+         } else {
 fluidRow(
   column(10,
          textInput("mycode",label=NULL,
@@ -114,10 +160,17 @@ fluidRow(
          tags$style(type="text/css", "#submit { height: 36px; width: 100%; font-size: 18px; display: block;}")
   )
 )
+         }
+})
+
 renderPlot({
-  input$submit
-  eval(parse(text=isolate(input$mycode)))
-},height=400)
+  if(!input$chkbx){
+  eval(parse(text=input$mycode))
+  } else {
+    input$submit
+    eval(parse(text=isolate(input$mycode)))
+  }
+},height=375)
 
 
 fluidRow(
@@ -133,14 +186,29 @@ fluidRow(
 ```
 
 ## Geoms (Two Variables) cont.
-ut.all <- ccdat[ccdat\$state=="Utah" & ccdat\$age=="All" & ccdat\$chronicCondition=="Diabetes",]
+ut.diabetes <- ccdat[ccdat\$state=="Utah" & ccdat\$age=="All" & ccdat\$chronicCondition=="Diabetes",]
 ```{r, echo=FALSE}
-ut.all <- ccdat[ccdat$state=="Utah" & ccdat$age=="All" & ccdat$chronicCondition=="Diabetes",]
+ut.diabetes <- ccdat[ccdat$state=="Utah" & ccdat$age=="All" & ccdat$chronicCondition=="Diabetes",]
+
+checkboxInput("chkbx3",label="Free Text?",TRUE)
+
+renderUI({
+  if(!input$chkbx3){
+fluidRow(
+  column(12,
+           selectInput("mycode3",label=NULL,
+                   choices=c("ggplot(ut.diabetes,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat=\"identity\",position=\"dodge\")",
+                            "ggplot(ut.diabetes,aes(x=year,y=prevalence,color=gender)) + geom_line()"),
+                   selected = "ggplot(ut.diabetes,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat=\"identity\",position=\"dodge\")",width="100%"),
+         tags$style(type="text/css", ".selectize-dropdown { width: 100%; font-size: 14px; line-height: 14px;} .selectize-input { width: 100%; font-size: 16px; line-height: 16px;}")
+  ))
+    
+         } else {
 
 fluidRow(
   column(10,
          textInput("mycode3",label=NULL,
-                   value="ggplot(ut.all,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat=\"identity\",position=\"dodge\")",width="100%"),
+                   value="ggplot(ut.diabetes,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat=\"identity\",position=\"dodge\")",width="100%"),
          tags$style(type="text/css", "#mycode3 { height: 36px; width: 100%; font-size: 16px; display: block;}")
   ),
   column(2,
@@ -148,10 +216,17 @@ fluidRow(
          tags$style(type="text/css", "#submit3 { height: 36px; width: 100%; font-size: 16px; display: block;}")
   )
 )
+         }
+})
+
 renderPlot({
-  input$submit3
-  eval(parse(text=isolate(input$mycode3)))
-},height=400)
+  if(!input$chkbx3){
+  eval(parse(text=input$mycode3))
+  } else {
+    input$submit3
+    eval(parse(text=isolate(input$mycode3)))
+  }
+},height=375)
 
 
 fluidRow(
@@ -179,6 +254,23 @@ ccdat$state <- trim(ccdat$state)
 ccdat$year <- as.numeric(ccdat$year)
 alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
 
+checkboxInput("chkbx4",label="Free Text?",TRUE)
+
+renderUI({
+  if(!input$chkbx4){
+fluidRow(
+  column(12,
+           selectInput("mycode4",label=NULL,
+                   choices=c("ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line()",
+                            "ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line() + facet_wrap(~gender)",
+                            "ggplot(alldat,aes(x=year,y=prevalence,color=gender)) + geom_point() + geom_line() + facet_wrap(~chronicCondition)",
+                            "ggplot(alldat,aes(x=year,y=prevalence,color=gender)) + geom_point() + geom_line() + facet_grid(gender~chronicCondition)"),
+                   selected = "ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line()",width="100%"),
+         tags$style(type="text/css", ".selectize-dropdown { width: 100%; font-size: 18px; line-height: 18px;} .selectize-input { width: 100%; font-size: 20px; line-height: 20px;}")
+  ))
+    
+         } else {
+
 fluidRow(
   column(10,
          textInput("mycode4",label=NULL,
@@ -190,10 +282,17 @@ fluidRow(
          tags$style(type="text/css", "#submit4 { height: 36px; width: 100%; font-size: 14px; display: block;}")
   )
 )
+         }
+})
+
 renderPlot({
-  input$submit4
-  eval(parse(text=isolate(input$mycode4)))
-},height=400)
+  if(!input$chkbx4){
+  eval(parse(text=input$mycode4))
+  } else {
+    input$submit4
+    eval(parse(text=isolate(input$mycode4)))
+  }
+},height=375)
 
 
 fluidRow(
