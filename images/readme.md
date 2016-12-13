@@ -1,1 +1,1 @@
-These images come from the Rstudio ggplot2 Cheat Sheet. to access the document in it's entirety, click (here)[https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf].
+These images come from the Rstudio ggplot2 Cheat Sheet. to access the document in it's entirety, click [here](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
