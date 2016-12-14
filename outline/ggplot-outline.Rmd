@@ -1,0 +1,147 @@
+---
+title: "ggplot"
+author: "https://mnielsen.shinyapps.io/ggplot-slides"
+output: pdf_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## CMS Public Data 
+The data used in these slides is public data located on the CMS page [here](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Chronic-Conditions/index.html).  I've arranged the data into a more usable format for this presentation which can be downloaded by clicking the button below.
+```{r, echo=F}
+library(knitr)
+
+ccdat <- read.csv("../chronic-conditions.csv")
+
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+ccdat$state <- trim(ccdat$state)
+
+alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
+
+ut.diabetes <- ccdat[ccdat$state=="Utah" &
+                     ccdat$age=="All" & 
+                     ccdat$chronicCondition=="Diabetes",]
+
+kable(head(ccdat))
+```
+
+To read the data into R run the following code:
+
+    setwd("C:\\path\\to\\folder")
+    # setwd("C:/path/to/folder")
+    ccdat <- read.csv("chronic-conditions.csv")
+
+## ggplot2 Basics
+
+    # If you haven't already install the package and load the library.
+    install.packages("ggplot2"); library(ggplot2)
+    
+### ggplot()
+    
+    # Add layers to ggplot() with '+'
+    ggplot([insert data here], aes(x=[x-var], y=[y-var], color=[color-var], [...])) + geom_[graph type]
+Layers can include combinations of "geoms", "stats", "scales", "faceting", "themes", etc.
+
+### qplot()
+
+    # Build a plot using the qplot() function
+    qplot(x=[x-var], y=[y-var], color=[color-var], [...], data=[insert data here], geom = "[graph type]")
+"Some introductions to ggplot2 make use of a function called qplot(), which is intended as a convenient interface for making graphs. It does require a little less typing than using ggplot() plus a geom, but I've found it a bit confusing to use because it has a slightly different way of specifying certain graphing parameters. I think it's simpler and easier to just use ggplot()." -Winston Chang (R Graphics Cookbook, 2012)
+\newpage
+
+## Geoms (One Variable)
+```{r, echo=T, message=F, warning=F}
+library(ggplot2)
+ccdat <- read.csv("../chronic-conditions.csv")
+
+new.theme <- theme_update(axis.text = element_text(size=14),
+                          axis.title=element_text(size=18))
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+ccdat$state <- trim(ccdat$state)
+ccdat$year <- as.numeric(ccdat$year)
+
+alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
+
+ggplot(alldat,aes(x=prevalence)) + geom_histogram()
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=prevalence)) + geom_histogram(binwidth=5)
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=prevalence)) + geom_density()
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=prevalence,color=gender)) + geom_density()
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=prevalence,color=gender,fill=gender)) + geom_density(alpha=0.35)
+```
+\newpage
+
+## Geoms (Two Variables)
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=year,y=prevalence)) + geom_point()
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=as.factor(year),y=prevalence)) + geom_boxplot()
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=year,y=prevalence)) + geom_smooth(method=lm)
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=year,y=prevalence)) + geom_point() + geom_smooth(method=lm)
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line()
+```
+\newpage
+
+## Geoms (Two Variables) cont.
+```{r, echo=T, message=F, warning=F}
+ut.diabetes <- ccdat[ccdat$state=="Utah" &
+                     ccdat$age=="All" & 
+                     ccdat$chronicCondition=="Diabetes",]
+
+ggplot(ut.diabetes,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat="identity",position="dodge")
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(ut.diabetes,aes(x=year,y=prevalence,color=gender)) + geom_line()
+```
+\newpage
+
+## Faceting
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line()
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line() + facet_wrap(~gender)
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=year,y=prevalence,color=gender)) + geom_point() + geom_line() + facet_wrap(~chronicCondition)
+```
+\newpage
+```{r, echo=T, message=F, warning=F}
+ggplot(alldat,aes(x=year,y=prevalence,color=gender)) + geom_point() + geom_line() + facet_grid(gender~chronicCondition)
+```
+\newpage
+
+## Citation
+
+- [ggplot2 Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+- CMS Medicare Chronic Conditions data from [cms.gov](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Chronic-Conditions/index.html)
+- [R Graphics Cookbook](http://www.cookbook-r.com/Graphs/) by Winston Chang
+
+
+# Questions?
