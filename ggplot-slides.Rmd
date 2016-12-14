@@ -9,24 +9,37 @@ output:
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(shinyBS)
+library(ggplot2)
+
+ccdat <- read.csv("chronic-conditions.csv")
+
+new.theme <- theme_update(axis.text = element_text(size=14),axis.title=element_text(size=18))
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+ccdat$state <- trim(ccdat$state)
+ccdat$year <- as.numeric(ccdat$year)
+alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
+
+ut.diabetes <- ccdat[ccdat$state=="Utah" & ccdat$age=="All" & ccdat$chronicCondition=="Diabetes",]
 ```
 
 ## CMS Public Data 
 The data used in these slides is public data located on the CMS page [here](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Chronic-Conditions/index.html).  I've arranged the data into a more usable format for this presentation which can be downloaded by clicking the button below.
 ```{r, echo=FALSE}
-ccdat <- read.csv("chronic-conditions.csv")
-  
-  output$table <- renderTable({
-    head(ccdat)
-  })
+
+output$table <- renderTable({
+  head(ccdat)
+})
 
 output$downloadData <- downloadHandler(
   filename = 'chronic-conditions.csv',
   content = function(file) {
     write.csv(ccdat, file)}
-    )
-      
-fluidRow(tableOutput('table'),
+)
+
+
+fluidRow(
+  tableOutput('table'),
   downloadButton('downloadData', 'Download')
   )
 ```
@@ -57,13 +70,8 @@ Layers can include combinations of "geoms", "stats", "scales", "faceting", "them
 ## Geoms (One Variable)
 alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",] 
 ```{r, echo=FALSE}
-library(ggplot2)
 
-new.theme <- theme_update(axis.text = element_text(size=14),axis.title=element_text(size=18))
-trim <- function (x) gsub("^\\s+|\\s+$", "", x)
-ccdat$state <- trim(ccdat$state)
-ccdat$year <- as.numeric(ccdat$year)
-alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
+cur_sel_val0 <- "ggplot(alldat,aes(x=prevalence)) + geom_histogram()"
 
 checkboxInput("chkbx0",label="Free Text?",FALSE)
 
@@ -84,9 +92,9 @@ fluidRow(
            
 fluidRow(
   column(10,
-         textInput("mycode0",label=NULL,
-                   value="ggplot(alldat,aes(x=prevalence)) + geom_histogram()",width="100%"),
-         tags$style(type="text/css", "#mycode0 { height: 36px; width: 100%; font-size: 18px; display: block;}")
+         textInput("mycode0b",label=NULL,
+                   value=cur_sel_val0, width="100%"),
+         tags$style(type="text/css", "#mycode0b { height: 36px; width: 100%; font-size: 18px; display: block;}")
   ),
   column(2,
          actionButton("submit0","Submit"),
@@ -98,14 +106,14 @@ fluidRow(
 
 renderPlot({
   if(!input$chkbx0){
-  eval(parse(text=input$mycode0))
+    cur_sel_val0 <<- isolate(input$mycode0)
+    eval(parse(text=input$mycode0))
   } else {
     input$submit0
-    eval(parse(text=isolate(input$mycode0)))
+    eval(parse(text=isolate(input$mycode0b)))
   }
 },height=375)
 
-library(shinyBS)
 fluidRow(
                             bsButton("q1", label = "", icon = icon("question"),
                                      style = "info", size = "extra-small"),
@@ -122,17 +130,10 @@ fluidRow(
 ## Geoms (Two Variables)
 alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",]
 ```{r, echo=FALSE}
-library(ggplot2)
 
-new.theme <- theme_update(axis.text = element_text(size=14),axis.title=element_text(size=18))
+cur_sel_val <- "ggplot(alldat,aes(x=year,y=prevalence)) + geom_point()"
 
-ccdat <- read.csv("chronic-conditions.csv")
-trim <- function (x) gsub("^\\s+|\\s+$", "", x)
-ccdat$state <- trim(ccdat$state)
-ccdat$year <- as.numeric(ccdat$year)
-alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
-
-checkboxInput("chkbx",label="Free Text?",TRUE)
+checkboxInput("chkbx",label="Free Text?",FALSE)
 
 renderUI({
   if(!input$chkbx){
@@ -152,7 +153,7 @@ fluidRow(
 fluidRow(
   column(10,
          textInput("mycode",label=NULL,
-                   value="ggplot(alldat,aes(x=year,y=prevalence)) + geom_point()",width="100%"),
+                   value=cur_sel_val, width="100%"),
          tags$style(type="text/css", "#mycode { height: 36px; width: 100%; font-size: 18px; display: block;}")
   ),
   column(2,
@@ -165,7 +166,8 @@ fluidRow(
 
 renderPlot({
   if(!input$chkbx){
-  eval(parse(text=input$mycode))
+    cur_sel_val <<- isolate(input$mycode)
+    eval(parse(text=input$mycode))
   } else {
     input$submit
     eval(parse(text=isolate(input$mycode)))
@@ -188,9 +190,10 @@ fluidRow(
 ## Geoms (Two Variables) cont.
 ut.diabetes <- ccdat[ccdat\$state=="Utah" & ccdat\$age=="All" & ccdat\$chronicCondition=="Diabetes",]
 ```{r, echo=FALSE}
-ut.diabetes <- ccdat[ccdat$state=="Utah" & ccdat$age=="All" & ccdat$chronicCondition=="Diabetes",]
 
-checkboxInput("chkbx3",label="Free Text?",TRUE)
+cur_sel_val3 <- "ggplot(ut.diabetes,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat=\"identity\",position=\"dodge\")"
+
+checkboxInput("chkbx3",label="Free Text?",FALSE)
 
 renderUI({
   if(!input$chkbx3){
@@ -208,7 +211,7 @@ fluidRow(
 fluidRow(
   column(10,
          textInput("mycode3",label=NULL,
-                   value="ggplot(ut.diabetes,aes(x=year,y=prevalence,fill=gender)) + geom_bar(stat=\"identity\",position=\"dodge\")",width="100%"),
+                   value=cur_sel_val3, width="100%"),
          tags$style(type="text/css", "#mycode3 { height: 36px; width: 100%; font-size: 16px; display: block;}")
   ),
   column(2,
@@ -221,7 +224,8 @@ fluidRow(
 
 renderPlot({
   if(!input$chkbx3){
-  eval(parse(text=input$mycode3))
+    cur_sel_val3 <<- isolate(input$mycode3)
+    eval(parse(text=input$mycode3))
   } else {
     input$submit3
     eval(parse(text=isolate(input$mycode3)))
@@ -244,17 +248,10 @@ fluidRow(
 ## Faceting
 alldat <- ccdat[ccdat\$age=="All" & ccdat\$state=="National",]
 ```{r, echo=FALSE}
-library(ggplot2)
 
-new.theme <- theme_update(axis.text = element_text(size=14),axis.title=element_text(size=18))
+cur_sel_val4 <- "ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line()"
 
-ccdat <- read.csv("chronic-conditions.csv")
-trim <- function (x) gsub("^\\s+|\\s+$", "", x)
-ccdat$state <- trim(ccdat$state)
-ccdat$year <- as.numeric(ccdat$year)
-alldat <- ccdat[ccdat$age=="All" & ccdat$state=="National",]
-
-checkboxInput("chkbx4",label="Free Text?",TRUE)
+checkboxInput("chkbx4",label="Free Text?",FALSE)
 
 renderUI({
   if(!input$chkbx4){
@@ -274,7 +271,7 @@ fluidRow(
 fluidRow(
   column(10,
          textInput("mycode4",label=NULL,
-                   value="ggplot(alldat,aes(x=year,y=prevalence,color=chronicCondition)) + geom_point() + geom_line()",width="100%"),
+                   value=cur_sel_val4, width="100%"),
          tags$style(type="text/css", "#mycode4 { height: 36px; width: 100%; font-size: 14px; display: block;}")
   ),
   column(2,
@@ -287,7 +284,8 @@ fluidRow(
 
 renderPlot({
   if(!input$chkbx4){
-  eval(parse(text=input$mycode4))
+    cur_sel_val4 <<- isolate(input$mycode4)
+    eval(parse(text=input$mycode4))
   } else {
     input$submit4
     eval(parse(text=isolate(input$mycode4)))
