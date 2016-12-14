@@ -1,6 +1,6 @@
 ---
 title: "ggplot2"
-author: "https://mnielsen.shinyapps.io/ggplot"
+author: "https://mnielsen.shinyapps.io/ggplot-slides"
 runtime: shiny
 output: 
   ioslides_presentation:
