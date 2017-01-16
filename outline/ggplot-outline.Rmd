@@ -2,6 +2,7 @@
 title: "ggplot"
 author: "https://mnielsen.shinyapps.io/ggplot-slides"
 output: pdf_document
+classoption: landscape
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
