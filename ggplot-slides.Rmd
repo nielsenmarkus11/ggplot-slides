@@ -58,7 +58,7 @@ To read the data into R run the following code:
 ### ggplot()
     
     # Add layers to ggplot() with '+'
-    ggplot([insert data here], aes(x=[x-var], y=[y-var], color=[color-var], [...])) + geom_[graph type]
+    ggplot([insert data here], aes(x=[x-var], y=[y-var], color=[color-var], [...])) + geom_[graph type]([...])
 Layers can include combinations of "geoms", "stats", "scales", "faceting", "themes", etc.
 
 ### qplot()
